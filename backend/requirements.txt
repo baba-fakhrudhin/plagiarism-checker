@@ -12,7 +12,7 @@ SQLAlchemy==2.0.19
 # Server & Utilities
 gunicorn==21.2.0
 python-dotenv==1.0.0
-PyJWT==2.8.1
+PyJWT==2.11.0
 whitenoise==6.5.0
 
 # File Processing (Plagiarism Checker)
