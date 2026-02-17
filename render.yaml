@@ -1,12 +1,7 @@
 services:
-  - type: pserv
-    name: plagiarism-checker-db
-    plan: free
-    region: oregon
-    databaseName: plagiarism_checker
-    user: plagiarism_user
-    postgresSQLVersion: "15"
-
+  # ============================================
+  # Backend Flask API Service
+  # ============================================
   - type: web
     name: plagiarism-checker-api
     env: python
@@ -30,12 +25,17 @@ services:
       - key: SECRET_KEY
         value: xY7kL9pQ2mN5vB3dF8gH1jK4rW6tY9uI0sP
       - key: JWT_SECRET_KEY
-        value: m2nN5qR8tU1vW4xY7zA0bC3dE6fG9hI2jK  
+        value: m2nN5qR8tU1vW4xY7zA0bC3dE6fG9hI2jK
       - key: UPLOAD_FOLDER
         value: /tmp/uploads
       - key: PYTHONUNBUFFERED
         value: "1"
+      - key: DATABASE_URL
+        value: postgresql://plagiarism_user:your_password@localhost:5432/plagiarism_checker
 
+  # ============================================
+  # Frontend React Service
+  # ============================================
   - type: web
     name: plagiarism-checker-web
     env: static
