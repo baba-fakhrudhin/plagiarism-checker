@@ -1,5 +1,16 @@
 services:
   # ============================================
+  # PostgreSQL Database Service
+  # ============================================
+  - type: pserv
+    name: plagiarism-checker-db
+    plan: free
+    region: oregon
+    databaseName: plagiarism_checker
+    user: plagiarism_user
+    postgresSQLVersion: "15"
+
+  # ============================================
   # Backend Flask API Service
   # ============================================
   - type: web
@@ -30,22 +41,3 @@ services:
         value: /tmp/uploads
       - key: PYTHONUNBUFFERED
         value: "1"
-      - key: DATABASE_URL
-        value: postgresql://plagiarism_user:your_password@localhost:5432/plagiarism_checker
-
-  # ============================================
-  # Frontend React Service (Static Site)
-  # ============================================
-  - type: web
-    name: plagiarism-checker-web
-    env: static
-    plan: free
-    repo: https://github.com/baba-fakhrudhin/plagiarism-checker
-    branch: main
-    rootDir: frontend
-    buildCommand: "npm install && npm run build"
-    staticPublishPath: build
-    autoDeploy: true
-    envVars:
-      - key: REACT_APP_API_URL
-        value: https://plagiarism-checker-api.onrender.com/api
