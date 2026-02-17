@@ -51,7 +51,7 @@ uploads/
 *.db
 *.sqlite
 *.sqlite3
-
+render.yaml
 # Logs
 *.log
 logs/
