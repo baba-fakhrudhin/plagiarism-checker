@@ -1,22 +1,34 @@
+# Core Flask Framework
 Flask==2.3.0
 Flask-SQLAlchemy==3.0.5
-Flask-JWT-Extended==4.5.0
+Flask-JWT-Extended==4.7.1
 Flask-CORS==4.0.0
+Werkzeug==2.3.0
+
+# Database
+psycopg2-binary==2.9.9
+SQLAlchemy==2.0.19
+
+# Server & Utilities
+gunicorn==21.2.0
 python-dotenv==1.0.0
-psycopg2-binary==2.9.6
+PyJWT==2.8.1
+whitenoise==6.5.0
+
+# File Processing (Plagiarism Checker)
 python-docx==0.8.11
 PyPDF2==3.0.1
 pdfplumber==0.9.0
 python-pptx==0.6.21
+python-magic==0.4.27
+
+# Document Analysis & ML
 requests==2.31.0
 beautifulsoup4==4.12.0
 sentence-transformers==2.2.0
 scikit-learn==1.3.0
 numpy==1.24.0
 transformers==4.30.0
-gunicorn==21.2.0
-whitenoise==6.5.0
-SQLAlchemy==2.0.19
+
+# Security
 bcrypt==4.0.1
-python-magic==0.4.27
-Werkzeug==2.3.0
