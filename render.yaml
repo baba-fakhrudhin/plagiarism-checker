@@ -1,24 +1,12 @@
-# ============================================
-# Render Infrastructure as Code Configuration
-# https://render.com/docs/infrastructure-as-code
-# ============================================
-
 services:
-  # ============================================
-  # PostgreSQL Database Service
-  # ============================================
   - type: pserv
     name: plagiarism-checker-db
-    ipAddress: 10.0.0.2
     plan: free
     region: oregon
     databaseName: plagiarism_checker
     user: plagiarism_user
-    postgresSQLVersion: 15
+    postgresSQLVersion: "15"
 
-  # ============================================
-  # Backend Flask API Service
-  # ============================================
   - type: web
     name: plagiarism-checker-api
     env: python
@@ -27,15 +15,9 @@ services:
     repo: https://github.com/baba-fakhrudhin/plagiarism-checker
     branch: main
     rootDir: backend
-    
-    # Build configuration
     buildCommand: "pip install -r requirements.txt"
     startCommand: "gunicorn --bind 0.0.0.0:$PORT --workers 2 --threads 2 --worker-class gthread --worker-tmp-dir /dev/shm --timeout 120 run:app"
-    
-    # Auto deploy on push
     autoDeploy: true
-    
-    # Environment variables
     envVars:
       - key: FLASK_ENV
         value: production
@@ -46,19 +28,14 @@ services:
       - key: PORT
         value: "5000"
       - key: SECRET_KEY
-        value: your-secret-key-change-this-NOW
+        value: xY7kL9pQ2mN5vB3dF8gH1jK4rW6tY9uI0sP
       - key: JWT_SECRET_KEY
-        value: your-jwt-secret-key-change-this-NOW
+        value: m2nN5qR8tU1vW4xY7zA0bC3dE6fG9hI2jK  
       - key: UPLOAD_FOLDER
         value: /tmp/uploads
-      - key: DATABASE_URL
-        fromDatabase:
-          name: plagiarism-checker-db
-          property: connectionString
+      - key: PYTHONUNBUFFERED
+        value: "1"
 
-  # ============================================
-  # Frontend React Service
-  # ============================================
   - type: web
     name: plagiarism-checker-web
     env: static
@@ -67,26 +44,9 @@ services:
     repo: https://github.com/baba-fakhrudhin/plagiarism-checker
     branch: main
     rootDir: frontend
-    
-    # Build configuration
     buildCommand: "npm install && npm run build"
     staticPublishPath: build
-    
-    # Auto deploy on push
     autoDeploy: true
-    
-    # Environment variables
     envVars:
       - key: REACT_APP_API_URL
         value: https://plagiarism-checker-api.onrender.com/api
-
-# ============================================
-# Databases
-# ============================================
-databases:
-  - name: plagiarism-checker-db
-    databaseName: plagiarism_checker
-    user: plagiarism_user
-    region: oregon
-    plan: free
-    postgresSQLVersion: "15"
