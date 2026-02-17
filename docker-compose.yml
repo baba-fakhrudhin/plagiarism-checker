@@ -1,0 +1,147 @@
+# ============================================
+# Docker Compose Configuration
+# For local development and testing
+# ============================================
+
+version: '3.8'
+
+services:
+  # ============================================
+  # PostgreSQL Database
+  # ============================================
+  database:
+    image: postgres:15-alpine
+    container_name: plagiarism-checker-db
+    environment:
+      POSTGRES_USER: plagiarism_user
+      POSTGRES_PASSWORD: plagiarism_password_123
+      POSTGRES_DB: plagiarism_checker
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - plagiarism-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U plagiarism_user -d plagiarism_checker"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  # ============================================
+  # Redis Cache (Optional but recommended)
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: plagiarism-checker-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - plagiarism-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ============================================
+  # Flask Backend API
+  # ============================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: plagiarism-checker-api
+    environment:
+      # Flask
+      FLASK_ENV: development
+      DEBUG: "True"
+      SECRET_KEY: your-secret-key-change-this-12345
+
+      # Database
+      DATABASE_URL: postgresql://plagiarism_user:plagiarism_password_123@database:5432/plagiarism_checker
+
+      # JWT
+      JWT_SECRET_KEY: your-jwt-secret-key-change-this-67890
+
+      # Upload
+      UPLOAD_FOLDER: /tmp/uploads
+      MAX_CONTENT_LENGTH: "52428800"
+
+      # Server
+      PORT: 5000
+      PYTHONUNBUFFERED: "1"
+      PYTHONDONTWRITEBYTECODE: "1"
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - uploads:/tmp/uploads
+    networks:
+      - plagiarism-network
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/auth/me"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    command: python run.py
+
+  # ============================================
+  # React Frontend
+  # ============================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_API_URL: http://localhost:5000/api
+    container_name: plagiarism-checker-web
+    ports:
+      - "3000:80"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - plagiarism-network
+    depends_on:
+      - backend
+    environment:
+      REACT_APP_API_URL: http://localhost:5000/api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+# ============================================
+# Networks
+# ============================================
+networks:
+  plagiarism-network:
+    driver: bridge
+
+# ============================================
+# Volumes
+# ============================================
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  uploads:
+    driver: local
