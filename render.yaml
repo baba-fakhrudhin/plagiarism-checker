@@ -34,12 +34,11 @@ services:
         value: postgresql://plagiarism_user:your_password@localhost:5432/plagiarism_checker
 
   # ============================================
-  # Frontend React Service
+  # Frontend React Service (Static Site)
   # ============================================
   - type: web
     name: plagiarism-checker-web
     env: static
-    region: oregon
     plan: free
     repo: https://github.com/baba-fakhrudhin/plagiarism-checker
     branch: main
