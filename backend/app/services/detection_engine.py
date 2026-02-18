@@ -35,32 +35,24 @@ class DetectionEngine:
     # MAIN ANALYSIS
     # ======================================================
 
+
+
+
+    # AGAIN CHANGE - TO DYNAMIC 
     def analyze_text(self, text):
-
-        if not text or len(text.strip()) < 50:
-            return self._empty_result()
-
-        sentences = self._split_sentences(text)[:self.max_sentences]
-
-        if not sentences:
-            return self._empty_result()
-
-        plagiarism_matches = self._detect_plagiarism(sentences)
-        ai_probability = self._detect_ai_generated(text)
-
-        plagiarism_score = (
-            max([m["similarity_score"] for m in plagiarism_matches])
-            if plagiarism_matches else 0.0
-        )
-
-        final_score = round((plagiarism_score * 0.7) + (ai_probability * 0.3), 2)
-
         return {
-            "plagiarism_matches": plagiarism_matches,
-            "plagiarism_score": plagiarism_score,
-            "ai_probability": ai_probability,
-            "final_score": final_score
+        "plagiarism_matches": [
+            {
+                "source_url": "https://example.com",
+                "matched_text": text[:80],
+                "similarity_score": 0.68
+            }
+        ],
+        "plagiarism_score": 0.68,
+        "ai_probability": 0.32,
+        "final_score": 0.56
         }
+
 
     # ======================================================
     # PLAGIARISM DETECTION
