@@ -1,22 +1,18 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager
-from flask_cors import CORS
-import os
-
-db = SQLAlchemy()
-jwt = JWTManager()
-
-def create_app(config_name='development'):
+def create_app(config_name=None):
     """Application factory"""
     from app.config import config
     
+    # Read config from environment variable
+    if not config_name:
+        config_name = os.getenv("CONFIG_NAME", "development")
+    
     app = Flask(__name__)
     
-    # Load configuration
+    # Fallback safety check
     if config_name not in config:
-        config_name = 'development'
+        config_name = "development"
     
+    # Load configuration
     app.config.from_object(config[config_name])
     
     # Initialize extensions
