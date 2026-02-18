@@ -36,3 +36,12 @@ export const deleteDocument = async (id) => {
   const response = await apiClient.delete(`/upload/document/${id}`);
   return response.data;
 };
+const uploadApi = {
+  uploadDocument,
+  uploadText,
+  listDocuments,
+  getDocument,
+  deleteDocument,
+};
+
+export default uploadApi;
