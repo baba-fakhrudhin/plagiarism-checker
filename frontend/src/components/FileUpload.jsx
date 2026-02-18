@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { uploadApi } from '../api/uploadApi';
+import  uploadApi  from '../api/uploadApi';
 
 export default function FileUpload({ onUploadSuccess }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,8 +13,10 @@ export default function FileUpload({ onUploadSuccess }) {
     setError(null);
 
     try {
-      const response = await uploadApi.uploadFile(file);
-      onUploadSuccess(response.data.document);
+      const response = await uploadApi.uploadDocument(file);
+
+      onUploadSuccess(response.document);
+
     } catch (err) {
       setError(err.response?.data?.error || 'Upload failed');
     } finally {

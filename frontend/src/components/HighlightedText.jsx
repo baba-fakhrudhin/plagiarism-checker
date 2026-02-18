@@ -1,65 +1,49 @@
-import React from 'react';
+import React from "react";
 
-export default function HighlightedText({ text, highlights }) {
-  const getSortedHighlights = () => {
-    return highlights.sort((a, b) => a.start - b.start);
-  };
+export default function HighlightedText({ text, highlights = [] }) {
+  if (!text) return null;
 
-  const renderHighlightedText = () => {
-    let lastIndex = 0;
-    const parts = [];
-    const sorted = getSortedHighlights();
+  let highlightedText = text;
 
-    sorted.forEach((highlight, idx) => {
-      // Add non-highlighted text
-      if (lastIndex < highlight.start) {
-        parts.push(
-          <span key={`text-${idx}`}>
-            {text.substring(lastIndex, highlight.start)}
-          </span>
-        );
-      }
+  // Sort by longest matched_text first (prevents nested overwrite issues)
+  const sortedHighlights = [...highlights].sort(
+    (a, b) => b.matched_text.length - a.matched_text.length
+  );
 
-      // Add highlighted text
-      const getColor = (type) => {
-        switch (type) {
-          case 'exact':
-            return 'bg-red-300';
-          case 'semantic':
-            return 'bg-yellow-300';
-          case 'paraphrase':
-            return 'bg-orange-300';
-          default:
-            return 'bg-yellow-200';
-        }
-      };
+  sortedHighlights.forEach((match) => {
+    if (!match.matched_text) return;
 
-      parts.push(
-        <span
-          key={`highlight-${idx}`}
-          className={`${getColor(highlight.type)} cursor-pointer hover:opacity-80 transition`}
-          title={`${highlight.type} match - ${(highlight.similarity * 100).toFixed(1)}% similar\nSource: ${highlight.source_title || 'Unknown'}`}
-        >
-          {text.substring(highlight.start, highlight.end)}
-        </span>
-      );
+    const similarity = match.similarity_score || 0;
 
-      lastIndex = highlight.end;
-    });
+    const getColor = () => {
+      if (similarity >= 0.85) return "bg-red-300";
+      if (similarity >= 0.75) return "bg-orange-300";
+      return "bg-yellow-300";
+    };
 
-    // Add remaining text
-    if (lastIndex < text.length) {
-      parts.push(
-        <span key="text-end">{text.substring(lastIndex)}</span>
-      );
-    }
+    const escaped = match.matched_text.replace(
+      /[.*+?^${}()|[\]\\]/g,
+      "\\$&"
+    );
 
-    return parts;
-  };
+    const regex = new RegExp(escaped, "gi");
+
+    highlightedText = highlightedText.replace(
+      regex,
+      (found) =>
+        `<span class="${getColor()} cursor-pointer hover:opacity-80 transition"
+          title="Similarity: ${(similarity * 100).toFixed(
+            1
+          )}%\nSource: ${match.source_url}">
+          ${found}
+        </span>`
+    );
+  });
 
   return (
-    <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 leading-relaxed text-gray-800 whitespace-pre-wrap">
-      {renderHighlightedText()}
-    </div>
+    <div
+      className="bg-gray-50 p-6 rounded-lg border border-gray-200 leading-relaxed text-gray-800 whitespace-pre-wrap"
+      dangerouslySetInnerHTML={{ __html: highlightedText }}
+    />
   );
 }
