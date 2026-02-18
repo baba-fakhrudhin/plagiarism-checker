@@ -12,7 +12,7 @@ class Config:
     }
     
     # JWT
-    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'dev-secret-key-change-in-production')
+    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', '9f3d8b2c6a1e4f7d9c2b5e8a6f1d3c7b9e2f4a6d8c1b3e5f7a9d2c6b8e1f3')
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
     
     # File Upload
@@ -34,7 +34,7 @@ class DevelopmentConfig(Config):
     TESTING = False
     SQLALCHEMY_DATABASE_URI = os.getenv(
         'DATABASE_URL',
-        'postgresql://user:password@localhost:5432/plagiarism_checker'
+        'postgresql://plagiarism_user:bNnmGKr47d100oPy2xRzC9d3QLBWsj5w@dpg-d6af0l95pdvs73emjjhg-a/plagiarism_checker'
     )
 
 class ProductionConfig(Config):
@@ -53,7 +53,7 @@ class TestingConfig(Config):
     DEBUG = True
     TESTING = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
-    JWT_SECRET_KEY = 'test-secret-key'
+    JWT_SECRET_KEY = '9f3d8b2c6a1e4f7d9c2b5e8a6f1d3c7b9e2f4a6d8c1b3e5f7a9d2c6b8e1f3'
 
 config = {
     'development': DevelopmentConfig,
