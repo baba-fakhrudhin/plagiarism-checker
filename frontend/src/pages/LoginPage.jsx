@@ -1,18 +1,21 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuthStore } from "../store/authStore";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const { login, isLoading, error } = useAuthStore();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const { login, isLoading, error, clearError } = useAuthStore();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await login(email, password);
-    if (success) {
-      navigate('/');
+
+    const result = await login(email, password);
+
+    if (result.success) {
+      navigate("/", { replace: true });
     }
   };
 
@@ -22,17 +25,19 @@ export default function LoginPage() {
         <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">
           Login
         </h1>
+
         <p className="text-center text-gray-600 mb-6">
           Welcome back to PlagiarismChecker
         </p>
 
         {error && (
-          <div className="bg-danger/10 border border-danger text-danger rounded-lg p-4 mb-4">
+          <div className="bg-red-100 border border-red-400 text-red-700 rounded-lg p-4 mb-4">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
               Email
@@ -40,7 +45,10 @@ export default function LoginPage() {
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                clearError();
+              }}
               required
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="your@email.com"
@@ -54,7 +62,10 @@ export default function LoginPage() {
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                clearError();
+              }}
               required
               className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="••••••••"
@@ -66,13 +77,17 @@ export default function LoginPage() {
             disabled={isLoading}
             className="w-full bg-primary text-white py-2 rounded-lg font-semibold hover:bg-secondary transition disabled:bg-gray-400"
           >
-            {isLoading ? 'Logging in...' : 'Login'}
+            {isLoading ? "Logging in..." : "Login"}
           </button>
+
         </form>
 
         <p className="text-center text-gray-600 mt-6">
-          Don't have an account?{' '}
-          <Link to="/signup" className="text-primary font-semibold hover:underline">
+          Don't have an account?{" "}
+          <Link
+            to="/signup"
+            className="text-primary font-semibold hover:underline"
+          >
             Sign Up
           </Link>
         </p>

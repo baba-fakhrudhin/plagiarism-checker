@@ -15,11 +15,12 @@ export default function Dashboard() {
   const loadData = async () => {
     try {
       const [docsRes, analysesRes] = await Promise.all([
-        uploadApi.getDocuments(1, 5),
+       uploadApi.listDocuments(1) ,
         analysisApi.listAnalyses(1, 5),
       ]);
-      setDocuments(docsRes.data.documents);
-      setAnalyses(analysesRes.data.analyses);
+      setDocuments(docsRes.documents || []);  
+      setAnalyses(analysesRes.analyses || []);
+
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -103,7 +104,7 @@ export default function Dashboard() {
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-semibold text-gray-800">
-                          Similarity: {(analysis.overall_similarity * 100).toFixed(1)}%
+                          Similarity: {(analysis.plagiarism_score* 100).toFixed(1)}%
                         </p>
                         <span className={`text-xs font-semibold px-2 py-1 rounded inline-block mt-2 ${getStatusBadge(analysis.status)}`}>
                           {analysis.status}

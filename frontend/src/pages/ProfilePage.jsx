@@ -1,81 +1,45 @@
-import React, { useState } from "react";
+import React from "react";
 import { useAuthStore } from "../store/authStore";
 
-const ProfilePage = () => {
-  const { user, updateProfile, isLoading, error } = useAuthStore();
+export default function ProfilePage() {
+  const { user, logout } = useAuthStore();
 
-  const [username, setUsername] = useState(user?.username || "");
-  const [password, setPassword] = useState("");
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const success = await updateProfile(username, password);
-
-    if (success) {
-      alert("Profile updated successfully");
-      setPassword("");
-    }
-  };
+  if (!user) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <p className="text-gray-600">Loading profile...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
-      <div className="bg-white shadow-2xl rounded-2xl w-full max-w-lg p-8">
-        
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-          Profile Settings
-        </h2>
+    <div className="max-w-4xl mx-auto px-4 py-12">
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">
+        Profile
+      </h1>
 
-        <div className="mb-6 text-center">
-          <p className="text-gray-600 text-sm">Logged in as</p>
-          <p className="font-semibold text-lg text-gray-800">
-            {user?.email}
+      <div className="bg-white rounded-lg shadow p-6 space-y-4">
+        <div>
+          <p className="text-sm text-gray-600">Username</p>
+          <p className="font-semibold text-gray-800">
+            {user.username}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <p className="text-sm text-gray-600">Email</p>
+          <p className="font-semibold text-gray-800">
+            {user.email}
+          </p>
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Username
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              New Password
-            </label>
-            <input
-              type="password"
-              placeholder="Leave blank to keep current password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none transition"
-            />
-          </div>
-
-          {error && (
-            <p className="text-red-500 text-sm text-center">{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition disabled:opacity-50"
-          >
-            {isLoading ? "Updating..." : "Update Profile"}
-          </button>
-        </form>
+        <button
+          onClick={logout}
+          className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+        >
+          Logout
+        </button>
       </div>
     </div>
   );
-};
-
-export default ProfilePage;
+}

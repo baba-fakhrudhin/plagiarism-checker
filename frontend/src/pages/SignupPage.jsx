@@ -1,121 +1,76 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuthStore } from '../store/authStore';
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuthStore } from "../store/authStore";
 
 export default function SignupPage() {
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
   const { signup, isLoading, error } = useAuthStore();
   const navigate = useNavigate();
-  const [validationError, setValidationError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setValidationError('');
 
-    if (password !== confirmPassword) {
-      setValidationError('Passwords do not match');
-      return;
-    }
+    const result = await signup(email, username, password);
 
-    if (password.length < 8) {
-      setValidationError('Password must be at least 8 characters');
-      return;
-    }
-
-    const success = await signup(email, username, password);
-    if (success) {
-      navigate('/');
+    if (result.success) {
+      navigate("/", { replace: true });
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary to-secondary flex items-center justify-center px-4">
-      <div className="bg-white rounded-lg shadow-2xl p-8 w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center text-gray-800 mb-2">
-          Sign Up
-        </h1>
-        <p className="text-center text-gray-600 mb-6">
-          Create your PlagiarismChecker account
-        </p>
+    <div className="min-h-screen flex items-center justify-center px-4 bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow w-full max-w-md">
+        <h1 className="text-2xl font-bold mb-6 text-center">Sign Up</h1>
 
-        {(error || validationError) && (
-          <div className="bg-danger/10 border border-danger text-danger rounded-lg p-4 mb-4">
-            {error || validationError}
+        {error && (
+          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">
+            {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="your@email.com"
-            />
-          </div>
+          <input
+            type="email"
+            placeholder="Email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full border px-3 py-2 rounded"
+          />
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Username
-            </label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="username"
-            />
-          </div>
+          <input
+            type="text"
+            placeholder="Username"
+            required
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="w-full border px-3 py-2 rounded"
+          />
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="••••••••"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="••••••••"
-            />
-          </div>
+          <input
+            type="password"
+            placeholder="Password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full border px-3 py-2 rounded"
+          />
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full bg-primary text-white py-2 rounded-lg font-semibold hover:bg-secondary transition disabled:bg-gray-400"
+            className="w-full bg-primary text-white py-2 rounded disabled:bg-gray-400"
           >
-            {isLoading ? 'Creating account...' : 'Sign Up'}
+            {isLoading ? "Creating..." : "Sign Up"}
           </button>
         </form>
 
-        <p className="text-center text-gray-600 mt-6">
-          Already have an account?{' '}
-          <Link to="/login" className="text-primary font-semibold hover:underline">
+        <p className="text-center mt-4 text-sm">
+          Already have an account?{" "}
+          <Link to="/login" className="text-primary">
             Login
           </Link>
         </p>
