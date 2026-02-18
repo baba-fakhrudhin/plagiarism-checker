@@ -1,4 +1,3 @@
-import os
 import re
 import requests
 import urllib.parse
@@ -8,45 +7,37 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # ==========================================================
-# Lazy Load Model (Prevents Render Boot Crash)
+# Lazy Load Model (Prevents Boot Crash)
 # ==========================================================
 
 _model = None
 
-
 def get_model():
     global _model
     if _model is None:
-        _model = SentenceTransformer(
-            "all-MiniLM-L6-v2",
-            device="cpu"
-        )
+        _model = SentenceTransformer("all-MiniLM-L6-v2", device="cpu")
     return _model
 
 
 # ==========================================================
-# CENTRAL DETECTION ENGINE
+# DETECTION ENGINE
 # ==========================================================
 
 class DetectionEngine:
-    """
-    Complete AI + Plagiarism + Web + File Processor Engine
-    """
 
     def __init__(self):
-        self.similarity_threshold = 0.72
-        self.max_sentences = 8
-        self.max_urls_per_sentence = 3
-        self.headers = {
-            "User-Agent": "Mozilla/5.0"
-        }
+        self.similarity_threshold = 0.75
+        self.max_sentences = 5   # reduced for speed
+        self.max_urls_per_sentence = 2
+        self.headers = {"User-Agent": "Mozilla/5.0"}
 
     # ======================================================
-    # MAIN ENTRY
+    # MAIN ANALYSIS
     # ======================================================
 
     def analyze_text(self, text):
-        if not text or len(text) < 50:
+
+        if not text or len(text.strip()) < 50:
             return self._empty_result()
 
         sentences = self._split_sentences(text)[:self.max_sentences]
@@ -62,10 +53,7 @@ class DetectionEngine:
             if plagiarism_matches else 0.0
         )
 
-        final_score = round(
-            (plagiarism_score * 0.7) + (ai_probability * 0.3),
-            2
-        )
+        final_score = round((plagiarism_score * 0.7) + (ai_probability * 0.3), 2)
 
         return {
             "plagiarism_matches": plagiarism_matches,
@@ -79,8 +67,12 @@ class DetectionEngine:
     # ======================================================
 
     def _detect_plagiarism(self, sentences):
-        model = get_model()
-        sentence_embeddings = model.encode(sentences)
+
+        try:
+            model = get_model()
+            sentence_embeddings = model.encode(sentences)
+        except Exception:
+            return []
 
         matches = []
 
@@ -90,11 +82,10 @@ class DetectionEngine:
 
             for url in urls:
                 content = self._fetch_content(url)
-
                 if not content:
                     continue
 
-                content = content[:5000]
+                content = content[:4000]
 
                 try:
                     content_embedding = model.encode([content])[0]
@@ -108,53 +99,54 @@ class DetectionEngine:
                         matches.append({
                             "source_url": url,
                             "matched_text": sentence,
-                            "similarity_score": float(similarity)
+                            "original_text": sentence,
+                            "similarity_score": float(similarity),
+                            "match_type": "semantic",
+                            "start_index": 0,
+                            "end_index": len(sentence)
                         })
 
                 except Exception:
                     continue
 
-        return self._deduplicate_matches(matches)
+        return self._deduplicate(matches)
 
     # ======================================================
-    # AI DETECTION (Pattern Based)
+    # AI DETECTION (Simple Heuristic)
     # ======================================================
 
     def _detect_ai_generated(self, text):
+
         sentences = self._split_sentences(text)
 
         if len(sentences) < 3:
-            return 0.0
+            return 0.1
 
         sentence_lengths = [len(s.split()) for s in sentences]
         variance = np.var(sentence_lengths)
 
         if variance < 5:
-            return 0.75
+            return 0.7
         elif variance < 10:
-            return 0.55
+            return 0.5
         else:
-            return 0.25
+            return 0.2
 
     # ======================================================
-    # WEB SEARCH (DuckDuckGo)
+    # SEARCH (DuckDuckGo HTML)
     # ======================================================
 
     def _search_text(self, query):
+
         results = []
 
         try:
-            encoded_query = urllib.parse.quote(query[:200])
+            encoded_query = urllib.parse.quote(query[:150])
             url = f"https://html.duckduckgo.com/html/?q={encoded_query}"
 
-            response = requests.get(
-                url,
-                headers=self.headers,
-                timeout=10
-            )
-            response.raise_for_status()
-
+            response = requests.get(url, headers=self.headers, timeout=8)
             soup = BeautifulSoup(response.text, "html.parser")
+
             links = soup.find_all("a", class_="result__a")
 
             for link in links[:self.max_urls_per_sentence]:
@@ -168,18 +160,13 @@ class DetectionEngine:
         return results
 
     # ======================================================
-    # FETCH WEB CONTENT
+    # FETCH PAGE TEXT
     # ======================================================
 
     def _fetch_content(self, url):
-        try:
-            response = requests.get(
-                url,
-                headers=self.headers,
-                timeout=10
-            )
-            response.raise_for_status()
 
+        try:
+            response = requests.get(url, headers=self.headers, timeout=8)
             soup = BeautifulSoup(response.content, "html.parser")
 
             for script in soup(["script", "style"]):
@@ -188,50 +175,49 @@ class DetectionEngine:
             text = soup.get_text(separator=" ")
             text = " ".join(text.split())
 
-            return text[:15000]
+            return text[:12000]
 
         except Exception:
             return None
 
     # ======================================================
-    # FILE PROCESSOR
+    # FILE PROCESSOR (SAFE VERSION)
     # ======================================================
 
     def extract_text_from_file(self, file_path, file_type):
 
         if file_type == "txt":
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-                return f.read()
+            try:
+                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                    return f.read()
+            except Exception:
+                return ""
 
         if file_type == "pdf":
-            import pdfplumber
-            text = []
-            with pdfplumber.open(file_path) as pdf:
-                for page in pdf.pages:
-                    t = page.extract_text()
-                    if t:
-                        text.append(t)
-            return "\n".join(text)
+            try:
+                import pdfplumber
+                text = []
+                with pdfplumber.open(file_path) as pdf:
+                    for page in pdf.pages:
+                        t = page.extract_text()
+                        if t:
+                            text.append(t)
+                return "\n".join(text)
+            except Exception:
+                return ""
 
         if file_type in ["docx", "doc"]:
-            from docx import Document
-            doc = Document(file_path)
-            return "\n".join(
-                para.text for para in doc.paragraphs
-                if para.text.strip()
-            )
+            try:
+                from docx import Document
+                doc = Document(file_path)
+                return "\n".join(
+                    para.text for para in doc.paragraphs
+                    if para.text.strip()
+                )
+            except Exception:
+                return ""
 
-        if file_type in ["pptx", "ppt"]:
-            from pptx import Presentation
-            prs = Presentation(file_path)
-            text = []
-            for slide in prs.slides:
-                for shape in slide.shapes:
-                    if hasattr(shape, "text") and shape.text.strip():
-                        text.append(shape.text)
-            return "\n".join(text)
-
-        raise ValueError("Unsupported file type")
+        return ""
 
     # ======================================================
     # HELPERS
@@ -239,24 +225,19 @@ class DetectionEngine:
 
     def _split_sentences(self, text):
         sentences = re.split(r"[.!?]+", text)
-        return [s.strip() for s in sentences if len(s.strip()) > 20]
+        return [s.strip() for s in sentences if len(s.strip()) > 25]
 
-    def _deduplicate_matches(self, matches):
-        if not matches:
-            return []
-
-        matches = sorted(
-            matches,
-            key=lambda m: m["similarity_score"],
-            reverse=True
-        )
-
+    def _deduplicate(self, matches):
+        seen = set()
         unique = []
-        for match in matches:
-            if match not in unique:
+
+        for match in sorted(matches, key=lambda x: x["similarity_score"], reverse=True):
+            key = (match["matched_text"], match["source_url"])
+            if key not in seen:
+                seen.add(key)
                 unique.append(match)
 
-        return unique[:25]
+        return unique[:20]
 
     def _empty_result(self):
         return {
