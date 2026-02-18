@@ -3,7 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from app import db
 from app.models import Document, AnalysisLog
-from app.services import DetectionEngine
+from app.services.detection_engine import DetectionEngine
 from app.utils.validators import allowed_file
 import os
 import hashlib

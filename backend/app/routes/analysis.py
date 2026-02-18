@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models import Document, Analysis, PlagiarismMatch, AnalysisLog
-from app.services import DetectionEngine
+from app.services.detection_engine import DetectionEngine
 from datetime import datetime
 import time
 import threading
