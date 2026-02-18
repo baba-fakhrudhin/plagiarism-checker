@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { uploadApi } from '../api/uploadApi';
+import uploadApi from '../api/uploadApi';
 import { analysisApi } from '../api/analysisApi';
 
 export default function Dashboard() {
