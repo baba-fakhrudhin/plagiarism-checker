@@ -8,6 +8,7 @@ Werkzeug==2.3.0
 # Database
 psycopg2-binary==2.9.9
 SQLAlchemy==2.0.19
+beautifulsoup4==4.12.0
 
 # Server & Utilities
 gunicorn==21.2.0
