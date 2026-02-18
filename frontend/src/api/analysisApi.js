@@ -1,23 +1,22 @@
 import apiClient from "./client";
 
-export const startAnalysis = async (documentId) => {
-  const response = await apiClient.post("/analysis/start", {
-    document_id: documentId,
-  });
+const analysisApi = {
+  startAnalysis: async (documentId) => {
+    const response = await apiClient.post("/analysis/start", {
+      document_id: documentId,
+    });
+    return response.data;
+  },
 
-  return response.data;
+  getStatus: async (analysisId) => {
+    const response = await apiClient.get(`/analysis/status/${analysisId}`);
+    return response.data;
+  },
+
+  listAnalyses: async () => {
+    const response = await apiClient.get("/analysis/list");
+    return response.data;
+  },
 };
 
-export const checkAnalysisStatus = async (analysisId) => {
-  const response = await apiClient.get(
-    `/analysis/status/${analysisId}`
-  );
-  return response.data;
-};
-
-export const listAnalyses = async (page = 1) => {
-  const response = await apiClient.get(
-    `/analysis/list?page=${page}`
-  );
-  return response.data;
-};
+export default analysisApi;
