@@ -35,7 +35,7 @@ export default function FileUpload({ onUploadSuccess }) {
 
     try {
       const response = await uploadApi.uploadText(text, 'Submitted Text');
-      onUploadSuccess(response.data.document);
+      onUploadSuccess(response.document);
       setText('');
     } catch (err) {
       setError(err.response?.data?.error || 'Upload failed');
