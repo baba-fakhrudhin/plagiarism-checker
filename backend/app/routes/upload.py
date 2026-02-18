@@ -3,13 +3,13 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from app import db
 from app.models import Document, AnalysisLog
-from app.services.file_processor import FileProcessor
+from app.services.detection_engine import DetectionEngine
 from app.utils.validators import allowed_file
 import os
 import hashlib
 
 upload_bp = Blueprint("upload", __name__)
-file_processor = FileProcessor()
+file_processor = DetectionEngine()
 
 
 # ==========================================================
@@ -57,7 +57,8 @@ def upload_document():
 
         file.save(file_path)
 
-        extracted_text = file_processor.extract_text(file_path, file_ext)
+        extracted_text = file_processor.extract_text_from_file(file_path, file_ext)
+
 
         if not extracted_text or not extracted_text.strip():
             os.remove(file_path)
