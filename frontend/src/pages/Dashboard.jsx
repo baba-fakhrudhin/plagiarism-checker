@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import uploadApi from '../api/uploadApi';
-import { analysisApi } from '../api/analysisApi';
+import analysisApi from '../api/analysisApi';
 
 export default function Dashboard() {
   const [documents, setDocuments] = useState([]);

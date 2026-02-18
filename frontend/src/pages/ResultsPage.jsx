@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { analysisApi } from '../api/analysisApi';
+import analysisApi from '../api/analysisApi';
 import ResultsViewer from '../components/ResultsViewer';
 import HighlightedText from '../components/HighlightedText';
 
