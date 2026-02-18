@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import FileUpload from './FileUpload';
+import FileUpload from '../components/FileUpload';
 import { analysisApi } from '../api/analysisApi';
 
 export default function UploadPage() {
