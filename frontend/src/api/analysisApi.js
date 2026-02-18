@@ -13,6 +13,11 @@ const analysisApi = {
     return response.data;
   },
 
+  getResults: async (analysisId) => {
+    const response = await apiClient.get(`/results/analysis/${analysisId}`);
+    return response.data;
+  },
+
   listAnalyses: async () => {
     const response = await apiClient.get("/analysis/list");
     return response.data;
