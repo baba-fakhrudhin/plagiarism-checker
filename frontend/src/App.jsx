@@ -6,9 +6,9 @@ import {
   Navigate,
   useLocation,
 } from "react-router-dom";
-import { useAuthStore } from "./src/store/authStore";
-import Navbar from "./src/components/Navbar";
-import PrivateRoute from "./src/components/PrivateRoute";
+import { useAuthStore } from "./store/authStore";
+import Navbar from "./components/Navbar";
+import PrivateRoute from "./components/PrivateRoute";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import Dashboard from "./pages/Dashboard";
